@@ -67,7 +67,7 @@ public class OverlayManager {
     /// Used to temporarily disable the tap, for a given coachmark.
     internal var enableTap: Bool = true
 
-    internal lazy var overlayView: OverlayView = OverlayView()
+    internal lazy var overlayView: OverlayView = OverlayView(delegate: self)
 
     internal var statusBarStyle: UIStatusBarStyle {
         if let blurEffectStyle = blurEffectStyle {
@@ -113,6 +113,12 @@ public class OverlayManager {
     @objc private func handleSingleTap(_ sender: AnyObject?) {
         if enableTap {
             self.overlayDelegate?.didReceivedSingleTap()
+        }
+    }
+
+    func handleHitTestOnOverlayView() {
+        if enableTap {
+            self.overlayDelegate?.didReceivedHitTest()
         }
     }
 
@@ -197,10 +203,18 @@ public class OverlayManager {
     public var forwardTouchEvents: Bool { return false }
 }
 
+extension OverlayManager: OverlayViewDelegate {
+
+    func onHitTest() {
+        self.handleHitTestOnOverlayView()
+    }
+}
+
 // swiftlint:disable class_delegate_protocol
 /// This protocol expected to be implemented by CoachMarkManager, so
 /// it can be notified when a tap occurred on the overlay.
 internal protocol OverlayManagerDelegate: Snapshottable {
     /// Called when the overlay received a tap event.
     func didReceivedSingleTap()
+    func didReceivedHitTest()
 }
